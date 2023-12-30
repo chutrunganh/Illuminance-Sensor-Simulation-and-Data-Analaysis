@@ -558,7 +558,8 @@ void min_max_mean_allTime(int argc, char* argv[]) {
     datafile.close();
 
     
-    int duration = (hourLast - hourFirst); //duration in hours
+    int duration = hourLast - hourFirst; //duration in hours
+    //Fail in case from 23:00:00 to 10:00:00, duration = 11 hours, but in this case, duration = 10 - 23 = -13 hours
     
     //write to summary file
     ofstream outputfile;
@@ -579,8 +580,10 @@ void min_max_mean_allTime(int argc, char* argv[]) {
     outputfile.close();
     cout << "Write to summary file successful." << endl; 
 }
+
+
 int main(int argc, char* argv[]) {
-    overWriteLogFile();
+    overWriteLogFile(); //overwrite log file every time rerun program
     filterOutlier(argc,argv);
     min_max_adverage(argc,argv);
     min_max_mean_allTime(argc,argv);

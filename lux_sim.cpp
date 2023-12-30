@@ -36,8 +36,8 @@ int main(int argc, char* argv[]) {
     
     // Default values for command-line arguments
     int num_sensors = 1;
-    int sampling_time = 60;
-    int measurement_duration = 24;
+    int sampling_time = 60;  //unit in seconds
+    int measurement_duration = 24;  //unit in hours
 
     // Check if the correct number of command-line arguments is provided
     if (argc != 7) {

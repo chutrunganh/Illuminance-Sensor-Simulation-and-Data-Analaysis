@@ -33,6 +33,7 @@ void writelog(const string& message) {
 //Read how to pass parameter in this link
 //https://stackoverflow.com/questions/50021775/command-line-arguments-to-execute-a-c-program
 int main(int argc, char* argv[]) {
+    
     // Default values for command-line arguments
     int num_sensors = 1;
     int sampling_time = 60;
@@ -76,6 +77,7 @@ int main(int argc, char* argv[]) {
 
     // Write header to the output file
     datafile << "id,time,value\n";
+
 
     // Generate simulated data
     time_t current_time = time(nullptr);

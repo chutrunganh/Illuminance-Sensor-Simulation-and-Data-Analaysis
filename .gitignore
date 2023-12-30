@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# CSV files
+*.csv
+
+# Log files
+*.log

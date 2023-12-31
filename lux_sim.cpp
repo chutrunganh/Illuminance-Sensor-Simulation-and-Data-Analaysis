@@ -27,6 +27,7 @@ void writelog(const string& message) {
     } else {
         cerr << "Error: Unable to open log file 'task1.log'" << endl;
     }
+    logfile.close();
 }
 
 

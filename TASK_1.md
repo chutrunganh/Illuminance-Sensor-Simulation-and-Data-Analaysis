@@ -142,6 +142,46 @@ id,time,value
 ```
 ## Error handling
 
+As mentioned in the requirements, the following errors may occur during the execution of Task 1:
+-  Wrong command-line statement, e.g.: lack of the 1 or a few required command-line
+argument. The error message can be “Error 01: invalid command”.
+    ```cpp
+    // Check if the correct number of command-line arguments is provided
+    if (argc != 7) {
+        writelog("Error 01: Invalid command");
+        return 1;
+    }
+    ```
+- Invalid value of the command-line argument, e.g. negative number of sensors. The error
+message can be “Error 02: invalid argument”.
+    ```cpp
+    // Check for invalid argument values
+        if (num_sensors < 1 || sampling_time < 1 || measurement_duration < 1) {
+            writelog("Error 02: Invalid argument");
+            return 1;
+        }
+    ```
+-  “lux_sensor.csv” file is existing and is a read-only file. The error message can be “Error 03:
+file access denied”
+    ```cpp
+    if (!datafile.is_open()) {
+        writelog("Error 03: File access denied");
+        return 1;
+    }
+    ```
+with the ```writelog``` function as follow:
+```cpp
+void writelog(const string& message) {
+    ofstream logfile("task1.log", ios::app);
+    if (logfile.is_open()) {
+        logfile << message << endl;
+    } else {
+        cerr << "Error: Unable to open log file 'task1.log'" << endl;
+    }
+    logfile.close();
+}
+```
+
 
 
 

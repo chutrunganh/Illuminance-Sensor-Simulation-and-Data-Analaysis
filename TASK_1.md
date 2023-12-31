@@ -75,6 +75,12 @@ Read how to pass parameters into Cpp program in this link: https://stackoverflow
 
 ```cpp
 int main(int argc, char* argv[]) {
+    
+    // Default values for command-line arguments
+    int num_sensors = 1;
+    int sampling_time = 60;  //unit in seconds
+    int measurement_duration = 24;  //unit in hours
+
     // Parse command-line arguments
     for (int i = 1; i < argc; i++) {
         string arg = argv[i];

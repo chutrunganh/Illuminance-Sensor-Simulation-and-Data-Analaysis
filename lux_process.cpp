@@ -564,6 +564,7 @@ void min_max_mean_allTime(int argc, char* argv[]) {
     //write to summary file
     ofstream outputfile;
     outputfile.open("lux_summary.csv");
+    outputfile << "id,parameter,time,value" << endl;
     for (int i = 1; i <= numberOfSensors; i++) {
         //id, max,timestap, value
         //id, min, timestamp, value

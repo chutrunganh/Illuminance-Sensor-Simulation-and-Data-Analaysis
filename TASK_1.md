@@ -140,7 +140,7 @@ id,time,value
 3,2023:12:31 05:26:59,32881.15
 ............
 ```
-## Error handling
+### Error handling
 
 As mentioned in the requirements, the following errors may occur during the execution of Task 1:
 -  Wrong command-line statement, e.g.: lack of the 1 or a few required command-line

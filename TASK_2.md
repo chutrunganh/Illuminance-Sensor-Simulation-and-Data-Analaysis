@@ -105,7 +105,7 @@ vector< vector<double> > id_per_hour_values(MAX_SENSORS_NUMBER, vector<double>(2
 vector< vector<int> > id_per_hour_count(MAX_SENSORS_NUMBER, vector<int>(25, 0)); 
 ```
 
-The id_per_hour_values matrix accumulates the values for each sensor ID with each hour, while the id_per_hour_count matrix tracks the frequency of each value.
+The ```id_per_hour_values``` matrix accumulates the values for each sensor ID with each hour, while the ```id_per_hour_count``` matrix tracks the frequency of each value.
 
 The value of ```MAX_SENSORS_NUMBER``` is set equal to 1000 by default. Also, you might wonder why the second dimension of the matrices is 25 ?. Since a  day only  has a 24 hours, we need 24 columns. However, since indexing starts at 0 and the first hour is represented by index 1, we require **25** columns in total.
 
@@ -127,7 +127,7 @@ vector<line_in_condition_struct> line_components;
 //array with each element is a line in condition.csv
 ```
 
-Now, we read the data and extract the necessary information (ID, hour from the timestamp, and value), then process this data, assigning it to ```line_components[i]`````` and updating two matrices in the corresponding cell for further processing of the average value. Also, remember that only valid values in range 1 - 30000 need to be process.
+Now, we read the data and extract the necessary information (ID, hour from the timestamp, and value), then process this data, assigning it to ```line_components[i]``` and updating two matrices in the corresponding cell for further processing of the average value. Also, remember that only valid values in range 1 - 30000 need to be process.
 
 ```cpp
     vector< vector<double> > id_per_hour_values(MAX_SENSORS_NUMBER, vector<double>(25, 0));     
@@ -173,7 +173,7 @@ Now, we read the data and extract the necessary information (ID, hour from the t
         }
     }
 ```
-After filling the two matrices, I will print them out to ensure we are still on the right track. Remember, we use listOfValidSensors to only print out valid rows.
+After filling the two matrices, I will print them out to ensure we are still on the right track. Remember, we use ```listOfValidSensors``` to only print out valid rows.
 ```cpp
     // For debugging only
     cout << "Matrix one: " << endl;

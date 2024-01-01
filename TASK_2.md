@@ -200,7 +200,53 @@ After filling the two matrices, I will print them out to ensure we are still on 
         }
     }
 ```
+Example with data file:      
+```csv
+id,time,value
+1,2023:12:01 13:41:46,6138.05
+2,2023:12:01 13:41:46,27731.97
+3,2023:12:01 13:41:46,37530.45
+1,2023:12:01 13:42:46,20043.72
 
+```
+
+```csv
+Matrix one: 
+0 0 0 0 0 0 0 0 0 0 0 0 193396 704972 595565 604828 517070 753593 723174 669346 573098 575122 468640 0 
+0 0 0 0 0 0 0 0 0 0 0 0 196741 691700 467868 708650 767981 688022 723511 808505 662875 662032 462077 0 
+0 0 0 0 0 0 0 0 0 0 0 0 212568 650499 650276 655114 644167 524465 732504 755244 756081 788001 512939 0 
+Matrix two: 
+0 0 0 0 0 0 0 0 0 0 0 0 14 42 44 43 38 43 43 47 36 47 33 0 
+0 0 0 0 0 0 0 0 0 0 0 0 12 45 34 48 48 46 46 51 47 40 32 0 
+0 0 0 0 0 0 0 0 0 0 0 0 14 44 44 47 43 42 46 46 46 46 32 0 
+```
+Seems correct. Afterward, we calculate the average value. I use a matrix ```vector< vector<double> > id_per_hour_adverage_value(MAX_SENSORS_NUMBER, vector<double>(25, 0))``` to store the average value by corresponding ID and hour:
+```cpp
+    cout << "Adverage value matrix: " << endl;
+    vector< vector<double> > id_per_hour_adverage_value(MAX_SENSORS_NUMBER, vector<double>(25, 0));
+    for (int i = 1; i <= MAX_SENSORS_NUMBER; i++) {
+        if (listOfValidSensors[i] == 1) {
+            for (int j = 0; j < 24; j++) {
+                if (id_per_hour_count[i][j] != 0) {  //id_per_hour_count[i][j] = 0 means no value of sensor i are measured in hour j
+                    id_per_hour_adverage_value[i][j] = id_per_hour_values[i][j] / id_per_hour_count[i][j];
+                    cout << id_per_hour_adverage_value[i][j] << " ";
+                }
+                else { //do not have any value of sensor i in hour j
+                    cout << "0 ";
+                }
+            }
+        cout << endl;
+        }
+    }
+```
+Print out the average matrix:
+```csv
+Adverage value matrix: 
+0 0 0 0 0 0 0 0 0 0 0 0 13814 16785.1 13535.6 14065.8 13607.1 17525.4 16818 14241.4 15919.4 12236.6 14201.2 0 
+0 0 0 0 0 0 0 0 0 0 0 0 16395.1 15371.1 13760.8 14763.5 15999.6 14957 15728.5 15853 14103.7 16550.8 14439.9 0 
+0 0 0 0 0 0 0 0 0 0 0 0 15183.4 14784.1 14779 13938.6 14980.6 12487.3 15924 16418.3 16436.5 17130.5 16029.4 0 
+``` 
+Now, with the average value in hand, we determine the condition of the lux base on that.The process is as follows: from the ID -> we transfer to the corresponding code/location (given in ```location.csv``` file) -> we get the corresponding min and max values associated with that type of lux (given in **Table 1**). We compare the average value we found above with the min and max to determine the condition.
 
 
 

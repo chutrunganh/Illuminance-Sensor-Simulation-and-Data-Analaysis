@@ -414,31 +414,190 @@ But the problem here is how to compare two hour (start and last hour). We can no
 ### Complie and Run
 Run the program and the ```luc_condition.csv``` should look something like this:
 ```csv
-
+id,time,location,value,condition
+1,2024:0:2 20:00:00,3,12992.49,bright
+2,2024:0:2 20:00:00,0,16678.92,NA
+3,2024:0:2 20:00:00,7,14678.67,bright
+1,2024:0:2 21:00:00,3,16247.99,bright
+2,2024:0:2 21:00:00,0,17931.26,NA
+3,2024:0:2 21:00:00,7,15804.86,bright
+......................
 ```
+## TASK 2.3 Calculating and Summarizing Sensor Data
+### Over View
+In this task, our objective is to compute and summarize the **maximum**, **minimum**, and **mean values** —associated with each sensor's readings ***over the entire dataset duration***.
 
+For each sensor under consideration, the analysis will be presented in a structured format comprising three distinct lines:
 
+1. **Maximum Value Analysis**: This will include the maximum value detected, along with the timestamp indicating when this maximum value was first observed.
 
+2. **Minimum Value Analysis**: Similarly.
 
+3. **Mean Value Analysis**: This segment will provide insights into the duration of the expermental and also the overall mean value derived from the sensor's readings throughout that period of time.
 
+### Data Structures:
+Initialy, I use a two-dimensional matrix, with each row corresponding to a unique sensor and each column representing a specific properties of thar sensor:
+- Column 0: Maximum value
+- Column 1: Minimum value
+- Column 2: Mean value
+The matrix is defined with default values as follow::
 
+```cpp
+double id_max_min_mean[MAX_SENSORS_NUMBER][3]; 
+for (int i = 0; i < MAX_SENSORS_NUMBER; i++) {
+    id_max_min_mean[i][0] = 0; // Initialize max value
+    id_max_min_mean[i][1] = 999999999999999; // Initialize min value
+    id_max_min_mean[i][2] = 0; // Initialize mean value
+}
+```
+Also, an array ```id_count[sensors]``` to count how many value does each sensor has. Through each interation, we accumulate values for each sensor and then combine with this array to obtain the mean value of each sensor
 
+Then, I use a struct to hold the structure of lines in the output file.
+```cpp
+    struct line_in_summary_struct {
+    int id;
+    string max_timpestamp;
+    string min_timpestamp;
+    string mean_timestamp;
+    double max_value;
+    double min_value;
+    double mean_value;
+};
+line_in_summary_struct  line_components[15000]; //each line in summary.csv is a struct 
+```
+### Data Processing Steps:
+Now we read data file, and for each input line, we store the maximum and minimum values of each sensor, along with the corresponding timestamps, in the respective matrix cells (We only need to store the timestamps for the maximum and minimum values; the duration for the mean value will be calculated later). Then, assign these values to ```line_components[i]```.
+```cpp
+    //count number of value of each sensor
+    int id_count[MAX_SENSORS_NUMBER] = {0}; 
 
+    string data_File_name = argv[1];
+    //read from data file, filter data by value in range 1 - 30000
+    
+    ifstream datafile;
+    datafile.open(data_File_name);
+    
+    vector<int> listOfValidSensors(MAX_SENSORS_NUMBER,0); //store all valid sensors
+    int numberOfSummaryLines = 0;
+    line_in_summary_struct  line_components[15000]; //each line in summary.csv is a struct 
 
+    string line;  
+    getline(datafile, line); //skip the first line
 
+    while (getline(datafile, line)) {
+        stringstream ss(line);  //treat line as a stream character
+        string id_str, timestamp, value_str;
+        //Read from ss and store to id_str, timestamp, value_str
 
+        getline(ss, id_str, ',');
+        getline(ss, timestamp, ',');
+        getline(ss, value_str, ',');
+        int id = stod(id_str);      
+        double value = stod(value_str);  
 
+        if (value >= 1 && value <= 30000) {
+            //update max, min, mean value of each sensor
+            if (value > id_max_min_mean[id][0]) {
+                id_max_min_mean[id][0] = value;
+                line_components[id].max_value = value;
+                line_components[id].max_timpestamp = timestamp;
+            }
+            if (value < id_max_min_mean[id][1]) {
+                id_max_min_mean[id][1] = value;
+                line_components[id].min_value = value;
+                line_components[id].min_timpestamp = timestamp;
+            }
+            //update mean value of each sensor
+            id_max_min_mean[id][2] += value;
+            id_count[id] ++;
 
+            listOfValidSensors[id] = 1;
+            //increase count variable
+            numberOfSummaryLines++;
+        }
+    }
+    datafile.close();
+```
+Now, after accumulate values of each sensor all the time, we calculate the mean value, reassign it right in that corresponding cell (```id_max_min_mean[i][2]```):
+```cpp
+for (int i = 1; i <= MAX_SENSORS_NUMBER; i++) {
+        if (listOfValidSensors[i] == 1) {
+            id_max_min_mean[i][2] = id_max_min_mean[i][2] / id_count[i];
+            line_components[i].mean_value = id_max_min_mean[i][2];
+            // line_components[i].mean_timestamp //process later
+        }
+    }
+```
+Move on to find the timestamp/ **duration** of mean value, we take the fisrt hour - last hour in the data file:
 
+```cpp
+    datafile.open(data_File_name);
+    getline(datafile, line); //skip the first line
+    //read the second line
+    getline(datafile, line);
+    stringstream secondLineStream(line);  //treat line as a stream character
+    string id_str_temp, timestampFirst_temp, value_str_temp;
+    //id_str has been declared above, so use id_str_temp instead
+    getline(secondLineStream, id_str_temp, ',');
+    getline(secondLineStream, timestampFirst_temp, ',');
+    getline(secondLineStream, value_str_temp, ',');
+    int hourFirst = stoi(timestampFirst_temp.substr(11, 2)); // Extract hour from first line
 
+    //read the last line
+    string lastLine;
+    while (getline(datafile, line)) {
+        lastLine = line;
+    }
+    stringstream lastLineStream(lastLine);  //treat line as a stream character
+    //string id_str_temp, timestampLast_temp, value_str_temp;
+    string timestampLast_temp;
+    getline(lastLineStream, id_str_temp, ',');
+    getline(lastLineStream, timestampLast_temp, ',');
+    getline(lastLineStream, value_str_temp, ',');
+    int hourLast = stoi(timestampLast_temp.substr(11, 2)); 
 
+    datafile.close();
+    
+    int duration = hourLast - hourFirst; //duration in hours 
+```
+***However, this code will fail in case from 23:00:00 to 10:00:00, duration = 11 hours, but in this case, duration = 10 - 23 = -13 hours (UPDATE this later)***
+You can run this piece of code and check. It must be the same as the third parameter from the command line you used in Task 1. After we have all the components we need, let's write to ```lux_summary.csv```:
 
+```cpp
+    ofstream outputfile;
+    outputfile.open("lux_summary.csv");
+    outputfile << "id,parameter,time,value" << endl;
+    for (int i = 1; i <= numberOfSensors; i++) {
+        //id, max,timestap, value
+        //id, min, timestamp, value
+        //id, mean, timestamp, value
 
-
-
+        //with this, can print out with two digits after decimal point
+        outputfile << i << ", max," << line_components[i].max_timpestamp << ','
+            << fixed << setprecision(2) << line_components[i].max_value << '\n'
+            << i << ", min," << line_components[i].min_timpestamp << ','
+            << fixed << setprecision(2) << line_components[i].min_value << '\n'
+            << i << ", mean," << duration << ":00:00,"
+            << fixed << setprecision(2) << line_components[i].mean_value << endl;
+    }
+    outputfile.close();
+    cout << "Write to summary file successful." << endl; 
+```
+### Main function
+Now we run three parts at once:
+```cpp
+int main(int argc, char* argv[]) {
+    overWriteLogFile(); 
+    filterOutlier(argc,argv);
+    min_max_adverage(argc,argv);
+    min_max_mean_allTime(argc,argv);
+    return 0;
+ }
+```
+*use ```overWriteLogFile()``` to overwrite any exist log files every time rerun the program.
 
 ### Error Handing
-Here, I maintain a global varinal ```linemum``` to track the line we are pcroseccing
+Here, I maintain a global variable ```linemum``` to track the line in data file we are pcroseccing since the error messages require this parameter.
 
 Errors may happen in task 2:
 - The input file data_filename.csv or location.csv does not exist or is not allowed to access. The error message can be “Error 01: input file not found or not accessible”
@@ -451,7 +610,6 @@ Errors may happen in task 2:
     }
     //Simiar to location.csv
     ```
-
 
 - The input file data_filename.csv or location.csv does not have proper format as required, e.g. it has no header file, wrong number of comma, or even consists of completely different data
 format. The error message can be “Error 02: invalid input file format”
@@ -472,9 +630,56 @@ missing. “Error 03: invalid command”
     }
     ```
 - The input data file contains wrong data:
-o Allthedatafieldsinonelineareblank,e.g.:“,,”
-o Idisblankorinvalid,e.g.:“-1,2023:11:1100:00:00,50.1” o Timeisblankorinvalid,e.g.:“1,2023:11:1100:00:,50.1” o Luxvalueisblank,e.g.:“1,2023:11:1100:00:00,”
-The error message must include the line number in the input file in which the error happens, i.e.: “Error 04: invalid data at line X” where X is the line number. The first line in the input file which is the header line is line 0 (zero), e.g.: in data_filename.csv the line “id,time,value” is the header line, the next lines onwards are data line and are numbered from 1 (one).
-The program should then ignore the line with wrong data and continue to process next line when perform task 2.
- If a sensor in data file is not included in the location file or the line including the location
+    - All the data fields in one line are blank,e.g.:“,,”
+    - Id is blank or invalid,e.g.:“-1,2023:11:11 00:00:00,50.1” 
+    - Time is blank or invalid,e.g.:“1,2023:11:11 00:00:,50.1”  
+    - Lux value is blank,e.g.:“1,2023:11:11 00:00:00,”
+The error message must include the line number in the input file in which the error happens, i.e.: “Error 04: invalid data at line X” where X is the line number. 
+    ```cpp
+    void overWriteLogFile(){
+        ofstream logfile;
+        logfile.open("task2.log", ios::trunc); //ios::trunc: delete the content of the file if it exists
+        logfile.close();
+    }
+
+    void writelog(const string& message){
+        ofstream logfile;
+        logfile.open("task2.log", ios::app); //ios::app: append to the end of file
+        logfile << message << endl;
+        logfile.close();
+    }
+
+    bool identifyErrors(string id, string time, string value) {
+        int count = 0;
+
+        if (id.empty()){
+            ++count;
+        }
+        else if (stoi(id) < 1){
+            ++count;
+        }
+        if (time.empty() || time.length() != 19){
+            ++count;
+        }
+        if (value.empty()){
+            ++count;
+        }
+        if (count > 0){ //if there is any error, return false
+            return false;
+        }
+        return true;
+
+    }
+    ```
+
+- If a sensor in data file is not included in the location file or the line including the location
 information of that sensor in location file has wrong data, e.g. data file has 9 sensors with ids from 1 to 9 but the location file has only 7 sensor ids 1, 2, 5, 6, 7, 8, 9 or location code in location.csv is blank, e.g.: “3,”. The error message can be “Error 05: unknown location of sensor ID” where ID is the id of the sensor which does not presented in location file.
+
+    ```cpp
+    if(line.empty()){
+            writelog("Error 05 : unknown location of sensor " + to_string(id)); //if location is empty, write to log file
+            continue;
+        }
+    ```
+
+***The program should then ignore the line with wrong data and continue to process next line when perform task 2.***

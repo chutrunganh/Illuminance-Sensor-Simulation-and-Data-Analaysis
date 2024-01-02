@@ -451,8 +451,7 @@ void min_max_mean_allTime(int argc, char* argv[]) {
     int id_count[MAX_SENSORS_NUMBER] = {0}; //maximun 1000 id
 
     string data_File_name = argv[1];
-    //read from data file, filter data by value in range 1 - 30000 and  calculate average 
-    //value of each sensors per hour
+    //read from data file, filter data by value in range 1 - 30000 
     ifstream datafile;
     datafile.open(data_File_name);
     if (!datafile){

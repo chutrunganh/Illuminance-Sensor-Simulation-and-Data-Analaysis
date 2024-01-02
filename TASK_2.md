@@ -1,4 +1,4 @@
-## Task 2.1:
+## Task 2.1: Filtering Invalid Data
 
 ### Overview
 The objective of this task is to read data from the `lux_sensor.csv` file, filter out the outliers based on the lux level range of 1-30000, and then store the outliers in a new CSV file named `lux_outlier.csv`.

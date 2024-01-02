@@ -246,7 +246,7 @@ Adverage value matrix:
 0 0 0 0 0 0 0 0 0 0 0 0 16395.1 15371.1 13760.8 14763.5 15999.6 14957 15728.5 15853 14103.7 16550.8 14439.9 0 
 0 0 0 0 0 0 0 0 0 0 0 0 15183.4 14784.1 14779 13938.6 14980.6 12487.3 15924 16418.3 16436.5 17130.5 16029.4 0 
 ``` 
-Now, with the average value in hand, we determine the condition of the lux base on that.The process is as follows: from the ID -> we transfer to the corresponding code/location (given in ```location.csv``` file) -> we get the corresponding min and max values associated with that type of lux (given in **Table 1**). We compare the average value we found above with the min and max to determine the condition.
+Now, with the average value in hand, we determine the condition of the lux base on that. The process is as follows: from the ID -> we transfer to the corresponding code/location (given in ```location.csv``` file) -> we get the corresponding min and max values associated with that type of lux (given in **Table 1**). We compare the average value we found above with the min and max to determine the condition.
 
 
 

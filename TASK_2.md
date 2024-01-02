@@ -248,6 +248,174 @@ Adverage value matrix:
 ``` 
 Now, with the average value in hand, we determine the condition of the lux base on that. The process is as follows: from the ID -> we transfer to the corresponding code/location (given in ```location.csv``` file) -> we get the corresponding min and max values associated with that type of lux (given in **Table 1**). We compare the average value we found above with the min and max to determine the condition.
 
+** Step by Step **
+
+First, we get the code/location of an ID given in ```location.csv```. For example, the file look as follow:
+```csv
+id,location
+1,3
+3,4
+4,12
+5,8
+6,9
+7,14
+8,10
+```
+Now, we read the ```location.csv``` file and use a vector ```locationMap``` to store IDs with corresponding locations (```locationMap[id] = location```):
+
+```cpp
+    string location_File_name = argv[2];
+
+    // READ FROM LOCATION FILE, STORE TO locationMap
+    vector<int> locationMap(1000,0); //locationMap[id] = location, default all value = 0
+    ifstream locationFile;
+    locationFile.open(location_File_name);
+    
+    string line;
+    getline(locationFile, line); //skip the first line
+    while (getline(locationFile, line)) {
+        int id, location;
+        stringstream ss(line);
+        //read the id
+        getline(ss, line, ',');
+        id = stoi(line);
+        //read the location
+        getline(ss, line, ',');
+        location = stoi(line);
+
+        locationMap[id] = location;
+    }
+    locationFile.close();
+```
+Print out the vector to ensure that we are still on the right track
+```cpp
+   // For debugging only
+    for ( int i = 0; i < sizeof(locationMap); i++) {
+        if (locationMap[i] != 0) {
+            cout << i << " " << locationMap[i] << endl;
+        }
+    }
+```
+After obtaining the correct location/code, we map it to the corresponding min and max values given in ```Table 1``` and output the condition of the corresponding location:
+
+```cpp
+string condition(int min, int max ,double value) {
+    if (value < min) {
+        return "dark";
+    }
+    else if (value > max) {
+        return "bright";
+    }
+    else return "good";
+}
+
+string table1(int location, double value) {
+    string out_put;
+    switch (location) {  //modify these value later. why valid range is 1 -30000 but table only 20 -20000
+        case 0:  
+            out_put =  "NA";
+            break;
+        case 1:
+            out_put = condition(20,50,value);
+            break;
+        case 2:
+            out_put = condition(50,100,value);
+            break;
+        case 3:
+            out_put = condition(100,200,value);
+            break;
+        ...........
+    }
+    return out_put;
+}
+```
+
+Then, we add the output condition to each corresponding line, completing the structure and preparing to write to ```lux_condition.csv```. Since we need to print the average value of each sensor for each hour, we will start from the ***first hour*** in the data file. We then iterate through all valid sensors, print their average value, and proceed to the next hour. Here is the pseudo-code to illustrate this process:
+
+```cpp
+ofstream conditionFile;
+    conditionFile.open("lux_condition.csv",ios::trunc);   
+    conditionFile << "id,time,location,value,condition"<< endl;
+   
+    current_hour = first_hour;
+    while (current_hour <= last_hour) {  
+
+        for (int id = 1; id <= MAX_SENSORS_NUMBER; id++) { //interate through valid sensors
+            if (listOfValidSensors[id] == 1) {
+                if (id_per_hour_count[id][current_hour] != 0) {
+                    double average_value = id_per_hour_adverage_value[id][current_hour];
+                    string condition_output = table1(locationMap[id], average_value);
+
+                    //write to condition file
+                    conditionFile << id << ',' << timestamp << ',' << locationMap[id] << ',' << std::fixed << setprecision(2) << average_value << ',' << condition_output << endl;
+                }
+            }
+        }
+        // Increment the hour
+        current_hour += 1
+    }
+    conditionFile.close();
+    cout << "Write to condition file successful." << endl; 
+```
+But the problem here is how to compare two hour (start and last hour). We can not extract the hour from the fisrt and last time stamp, since there my be a case: start time 23:00:00 today to last time 5:00:00 tomorrow, that will make compare by pure hour become useless. Therefore, I use time_t and tm  data structure to cpmare between them.
+***I read about how to use tm, time_t in c++ in this link: https://copyprogramming.com/howto/c-converting-a-string-to-a-time-t-variable***
+```cpp
+   
+    //get the first hour apper in data file, convert to time_t object
+    string tmp_first_time_stamp = line_components[0].timpestamp;
+    tm tm_first = {};
+
+    tm_first.tm_year = std::stoi(tmp_first_time_stamp.substr(0, 4)) - 1900;  // Year since 1900
+    tm_first.tm_mon = std::stoi(tmp_first_time_stamp.substr(5, 2)) - 1;      // Month (0-based)
+    tm_first.tm_mday = std::stoi(tmp_first_time_stamp.substr(8, 2));        // Day
+    tm_first.tm_hour = std::stoi(tmp_first_time_stamp.substr(11, 2));       // Hour
+    // why we must subtract 1900: https://stackoverflow.com/questions/55211776/my-question-is-about-using-1900-in-tm-year
+
+    time_t first_time_stamp = mktime(&tm_first);
+
+    
+    //get the last hour apper in data file
+    string tmp_last_time_stamp = line_components[numberOfConditionLines-1].timpestamp;
+    tm tm_last = {};
+    tm_last.tm_year = std::stoi(tmp_last_time_stamp.substr(0, 4)) - 1900;  // Year since 1900
+    tm_last.tm_mon = std::stoi(tmp_last_time_stamp.substr(5, 2)) - 1;      // Month (0-based)
+    tm_last.tm_mday = std::stoi(tmp_last_time_stamp.substr(8, 2));        // Day
+    tm_last.tm_hour = std::stoi(tmp_last_time_stamp.substr(11, 2));       // Hour
+
+    time_t last_time_stamp = mktime(&tm_last);
+
+    time_t current_time_stamp = first_time_stamp;
+    tm *local_time;
+
+    while (current_time_stamp <= last_time_stamp) {  //tm can not compare with each other, so must convert to time_t
+        local_time = localtime(&current_time_stamp);  //convert back to tm object to extract hour
+        //Do not assign int hour = local_time->tm_hour; because it  will make 08 hour become 8 hour
+
+        for (int id = 1; id <= MAX_SENSORS_NUMBER; id++) {
+            if (listOfValidSensors[id] == 1) {
+                if (id_per_hour_count[id][local_time->tm_hour] != 0) {
+                    double average_value = id_per_hour_adverage_value[id][local_time->tm_hour];
+                    string condition_output = table1(locationMap[id], average_value);
+
+                    //write to condition file
+                    conditionFile << id << ',' << local_time->tm_year + 1900 << ":"<< local_time->tm_mon <<":" << local_time->tm_mday  << " " << local_time->tm_hour + 1 << ":00:00"
+                                  << ',' << locationMap[id] << ',' << std::fixed << std::setprecision(2) << average_value
+                                  << ',' << condition_output << std::endl;
+                }
+            }
+        }
+
+        // Increment the hour
+        current_time_stamp += 3600;  // 3600 seconds = 1 hour
+    }
+    conditionFile.close();
+    cout << "Write to condition file successful." << endl; // For debugging 
+```
+### Complie and Run
+Run the program and the ```luc_condition.csv``` should look something like this:
+```csv
+
+```
 
 
 

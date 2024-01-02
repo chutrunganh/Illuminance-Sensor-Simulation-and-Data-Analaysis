@@ -49,7 +49,7 @@ The objective of this task is to read data from the `lux_sensor.csv` file, filte
     ```cpp
     ofstream outliersFile;
     outliersFile.open("lux_outlier.csv",ios::trunc);   //ios::trunc: delete the content of the file if it exists
-    outliersFile << "number of outliers: " << numOutliers+1 << endl;  //+1 because numOutliers start from 0
+    outliersFile << "number of outliers: " << numOutliers << endl;  
     outliersFile << "id,time,value"<< endl;
     for (int i = 0; i < numOutliers; i++) {
         outliersFile << line_in_outlier[i] << endl;
@@ -333,7 +333,7 @@ string table1(int location, double value) {
 Then, we add the output condition to each corresponding line, completing the structure and preparing to write to ```lux_condition.csv```. Since we need to print the average value of each sensor for each hour, we will start from the ***first hour*** in the data file. We then iterate through all valid sensors, print their average value, and proceed to the next hour. Here is the pseudo-code to illustrate this process:
 
 ```cpp
-ofstream conditionFile;
+    ofstream conditionFile;
     conditionFile.open("lux_condition.csv",ios::trunc);   
     conditionFile << "id,time,location,value,condition"<< endl;
    

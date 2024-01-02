@@ -111,7 +111,7 @@ void filterOutlier(int argc, char* argv[]) {
     //write to outliers file
     ofstream outliersFile;
     outliersFile.open("lux_outlier.csv",ios::trunc);   //ios::trunc: delete the content of the file if it exists
-    outliersFile << "number of outliers: " << numOutliers+1 << endl;  //+1 because numOutliers start from 0
+    outliersFile << "number of outliers: " << numOutliers << endl; 
     outliersFile << "id,time,value"<< endl;
     for (int i = 0; i < numOutliers; i++) {
         outliersFile << line_in_outlier[i] << endl;

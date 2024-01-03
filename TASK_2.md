@@ -596,6 +596,8 @@ int main(int argc, char* argv[]) {
 ```
 *use ```overWriteLogFile()``` to overwrite any exist log files every time rerun the program.
 
+In Task 2, consisting of subtasks **2.1**, **2.2**, and **2.3**, I access the data file individually for each subtask. Consequently, I open and close the data file a total of three times throughout the process. This approach is deliberately simplistic to facilitate a clearer understanding of the code, without any particular emphasis on performance optimization. However, for those prioritizing efficiency, it would be advisable to open the data file just once and execute all read and assignment operations for the three subtasks together.
+
 ### Error Handing
 Here, I maintain a global variable ```linemum``` to track the line in data file we are pcroseccing since the error messages require this parameter.
 

@@ -125,7 +125,7 @@ datafile << i << "," << timestamp_str << "," << fixed << setprecision(2) << meas
 ### Complie and Run
 &emsp; Now, run the command from the Linux terminal to compile the program:
 ```bash
-gcc lux_sim.cpp
+g++ lux_sim.cpp -o lux_sim
 ```
 Then run it:
 ```bash

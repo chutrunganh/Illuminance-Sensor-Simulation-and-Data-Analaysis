@@ -135,6 +135,9 @@ Then run it:
 ```bash
 Data generated and store successfully!
 ```
+
+![ComplieAndRun](https://github.com/chutrunganh/Illuminance-Sensor-Simulation-and-Data-Analaysis-/assets/143728449/0ef31f10-08f5-4677-b04c-ac5e51538ec2)
+
 &emsp;Checking the `lux_sensor.csv` file, it will appear in the same directory as our code and may look something like this:
 ```csv
 id,time,value
